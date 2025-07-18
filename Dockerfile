@@ -7,6 +7,6 @@ COPY . .
 RUN chmod +x mvnw
 RUN ./mvnw clean install -DskipTests
 
-CMD ["java", "-jar", "target/order-service-0.0.1-SNAPSHOT.jar"]
+EXPOSE 8083
 
-EXPOSE 8084
+CMD ["java", "-jar", "target/order-service-0.0.1-SNAPSHOT.jar"]
