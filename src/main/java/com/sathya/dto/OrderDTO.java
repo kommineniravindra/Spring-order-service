@@ -15,4 +15,5 @@ public class OrderDTO {
     private List<OrderItemDTO> items;
     private double totalAmount;
     private LocalDateTime orderDate;
+    private String status;
 }

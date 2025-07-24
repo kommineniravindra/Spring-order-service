@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map; 
 import java.util.stream.Collectors;
 
 @RestController
@@ -26,13 +27,13 @@ public class OrderController {
         return ResponseEntity.ok("Order placed successfully");
     }
 
-    // ✅ Get orders of the logged-in user
+
     @GetMapping("/my")
     public ResponseEntity<List<Order>> getMyOrders(@RequestHeader("Authorization") String token) {
         return ResponseEntity.ok(orderService.getMyOrders(token));
     }
 
-    // ✅ Get all orders for analytics-service
+    
     @GetMapping("/all")
     public ResponseEntity<List<OrderDTO>> getAllOrders() {
         List<Order> orders = orderService.getAllOrders();
@@ -47,10 +48,24 @@ public class OrderController {
                 order.getUserId(),
                 itemDTOs,
                 order.getTotalAmount(),
-                order.getOrderDate()
+                order.getOrderDate(),
+                order.getStatus() != null ? order.getStatus().name() : "UNKNOWN" // --- MODIFIED: Safely get enum name ---
             );
         }).collect(Collectors.toList());
 
         return ResponseEntity.ok(orderDTOs);
     }
+
+    // --- ADD THIS NEW ENDPOINT ---
+    @PutMapping("/{orderId}/status")
+    public ResponseEntity<String> updateOrderStatus(@PathVariable Long orderId,
+                                                    @RequestBody Map<String, String> statusUpdate) {
+        String status = statusUpdate.get("status"); 
+        if (status == null || status.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Status cannot be empty.");
+        }
+        orderService.updateOrderStatus(orderId, status);
+        return ResponseEntity.ok("Order status updated successfully!");
+    }
+   
 }

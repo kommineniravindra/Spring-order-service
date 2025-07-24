@@ -13,9 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrderRequest {
-//    private Long userId;
-	
     private List<CartItem> cartItems;
     private double totalAmount;
+    private String status;
 }
-
