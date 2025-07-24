@@ -79,5 +79,11 @@ public class OrderService {
             throw new IllegalArgumentException("Invalid status provided: " + newStatus, e);
         }
     }
+    public void deleteOrder(Long orderId) {
+        if (!orderRepository.existsById(orderId)) {
+            throw new EntityNotFoundException("Order not found with ID: " + orderId);
+        }
+        orderRepository.deleteById(orderId);
+    }
   
 }

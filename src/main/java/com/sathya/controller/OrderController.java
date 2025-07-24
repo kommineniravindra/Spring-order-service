@@ -1,17 +1,28 @@
 package com.sathya.controller;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.sathya.dto.OrderDTO;
 import com.sathya.dto.OrderItemDTO;
 import com.sathya.dto.OrderRequest;
 import com.sathya.entity.Order;
 import com.sathya.service.OrderService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Map; 
-import java.util.stream.Collectors;
+import jakarta.persistence.EntityNotFoundException;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -66,6 +77,18 @@ public class OrderController {
         }
         orderService.updateOrderStatus(orderId, status);
         return ResponseEntity.ok("Order status updated successfully!");
+    }
+    @DeleteMapping("/{orderId}") // Standard RESTful endpoint for deleting a resource by ID
+    public ResponseEntity<String> deleteOrder(@PathVariable Long orderId) {
+        try {
+            orderService.deleteOrder(orderId);
+            return ResponseEntity.ok("Order deleted successfully!");
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build(); // 404 Not Found if order doesn't exist
+        } catch (Exception e) {
+            // Catch any other unexpected exceptions and return a 500
+            return ResponseEntity.internalServerError().body("Failed to delete order: " + e.getMessage());
+        }
     }
    
 }
