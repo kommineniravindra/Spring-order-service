@@ -9,7 +9,7 @@ import java.security.Key;
 public class JwtUtil {
 
    
-    private static final String SECRET = "MySuperSecretKeyForJwtThatShouldBeLongEnough123456789"; // at least 32 bytes
+    private static final String SECRET = "MySuperSecretKeyForJwtThatShouldBeLongEnough123456789ABCDEF"; // at least 32 bytes
     private static final Key SECRET_KEY = Keys.hmacShaKeyFor(SECRET.getBytes());
 
     public static String extractUsername(String token) {
