@@ -11,6 +11,4 @@ public class OrderItemDTO {
     private String productName;
     private int quantity;
     private double price;
-
 }
-

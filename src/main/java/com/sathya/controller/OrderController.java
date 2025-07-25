@@ -38,13 +38,11 @@ public class OrderController {
         return ResponseEntity.ok("Order placed successfully");
     }
 
-
     @GetMapping("/my")
     public ResponseEntity<List<Order>> getMyOrders(@RequestHeader("Authorization") String token) {
         return ResponseEntity.ok(orderService.getMyOrders(token));
     }
 
-    
     @GetMapping("/all")
     public ResponseEntity<List<OrderDTO>> getAllOrders() {
         List<Order> orders = orderService.getAllOrders();
@@ -60,35 +58,33 @@ public class OrderController {
                 itemDTOs,
                 order.getTotalAmount(),
                 order.getOrderDate(),
-                order.getStatus() != null ? order.getStatus().name() : "UNKNOWN" // --- MODIFIED: Safely get enum name ---
+                order.getStatus() != null ? order.getStatus().name() : "UNKNOWN"
             );
         }).collect(Collectors.toList());
 
         return ResponseEntity.ok(orderDTOs);
     }
 
-    // --- ADD THIS NEW ENDPOINT ---
     @PutMapping("/{orderId}/status")
     public ResponseEntity<String> updateOrderStatus(@PathVariable Long orderId,
                                                     @RequestBody Map<String, String> statusUpdate) {
-        String status = statusUpdate.get("status"); 
+        String status = statusUpdate.get("status");
         if (status == null || status.trim().isEmpty()) {
             return ResponseEntity.badRequest().body("Status cannot be empty.");
         }
         orderService.updateOrderStatus(orderId, status);
         return ResponseEntity.ok("Order status updated successfully!");
     }
-    @DeleteMapping("/{orderId}") // Standard RESTful endpoint for deleting a resource by ID
+
+    @DeleteMapping("/{orderId}")
     public ResponseEntity<String> deleteOrder(@PathVariable Long orderId) {
         try {
             orderService.deleteOrder(orderId);
             return ResponseEntity.ok("Order deleted successfully!");
         } catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build(); // 404 Not Found if order doesn't exist
+            return ResponseEntity.notFound().build();
         } catch (Exception e) {
-            // Catch any other unexpected exceptions and return a 500
             return ResponseEntity.internalServerError().body("Failed to delete order: " + e.getMessage());
         }
     }
-   
 }

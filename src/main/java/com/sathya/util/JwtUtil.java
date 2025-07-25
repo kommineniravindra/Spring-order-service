@@ -8,7 +8,7 @@ import java.security.Key;
 
 public class JwtUtil {
 
-    // ✅ Use same key as auth-service
+   
     private static final String SECRET = "MySuperSecretKeyForJwtThatShouldBeLongEnough123456789"; // at least 32 bytes
     private static final Key SECRET_KEY = Keys.hmacShaKeyFor(SECRET.getBytes());
 
@@ -25,10 +25,11 @@ public class JwtUtil {
     }
 
     private static Claims extractAllClaims(String token) {
+        String cleanedToken = token.startsWith("Bearer ") ? token.substring(7) : token;
         return Jwts.parserBuilder()
                 .setSigningKey(SECRET_KEY)
                 .build()
-                .parseClaimsJws(token.replace("Bearer ", ""))
+                .parseClaimsJws(cleanedToken)
                 .getBody();
     }
 }

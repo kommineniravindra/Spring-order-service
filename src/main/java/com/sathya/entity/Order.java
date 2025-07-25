@@ -8,7 +8,7 @@ import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
-@Table(name = "orders") 
+@Table(name = "orders")
 @Data
 public class Order {
 
@@ -20,10 +20,8 @@ public class Order {
     private LocalDateTime orderDate;
     private double totalAmount;
 
-    // --- ADD THIS NEW FIELD ---
-    @Enumerated(EnumType.STRING) 
+    @Enumerated(EnumType.STRING)
     private OrderStatus status;
-    // -------------------------
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     @JsonManagedReference

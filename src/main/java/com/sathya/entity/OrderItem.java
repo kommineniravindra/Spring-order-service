@@ -19,6 +19,6 @@ public class OrderItem {
 
     @ManyToOne
     @JoinColumn(name = "order_id")
-    @JsonIgnore  // ✅ Important: Prevents infinite recursion during JSON serialization
+    @JsonIgnore
     private Order order;
 }

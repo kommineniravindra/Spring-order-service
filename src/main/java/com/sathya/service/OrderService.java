@@ -10,11 +10,11 @@ import org.springframework.stereotype.Service;
 import com.sathya.dto.OrderRequest;
 import com.sathya.entity.Order;
 import com.sathya.entity.OrderItem;
-import com.sathya.entity.OrderStatus;
+import com.sathya.entity.OrderStatus; // Ensure this import exists
 
 import com.sathya.repository.OrderRepository;
 import com.sathya.util.JwtUtil;
-import jakarta.persistence.EntityNotFoundException; 
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class OrderService {
@@ -29,53 +29,56 @@ public class OrderService {
         order.setOrderDate(LocalDateTime.now());
         order.setUserId(userId);
         order.setTotalAmount(request.getTotalAmount());
-        // --- MODIFY HERE: Set initial status from request ---
-        try {
-            order.setStatus(OrderStatus.valueOf(request.getStatus().toUpperCase()));
-        } catch (IllegalArgumentException e) {
-            // If the status from the frontend is invalid, default to PENDING
-            order.setStatus(OrderStatus.PENDING);
-            System.err.println("Warning: Invalid initial status received for order. Defaulting to PENDING. " + e.getMessage());
-        }
 
+        // --- START OF CORRECTED LOGIC FOR STATUS HANDLING ---
+        String initialStatus = request.getStatus(); // Get the status string from the request
+        if (initialStatus == null || initialStatus.trim().isEmpty()) {
+            // If the frontend did not send a status, or it's empty, default to PENDING
+            order.setStatus(OrderStatus.PENDING);
+        } else {
+            try {
+                // Attempt to parse the provided status string into an enum value
+                order.setStatus(OrderStatus.valueOf(initialStatus.toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                // If the provided string is not a valid OrderStatus enum name, default to PENDING
+                order.setStatus(OrderStatus.PENDING);
+                System.err.println("Warning: Invalid initial order status received ('" + initialStatus + "'). Defaulting to PENDING. Error: " + e.getMessage());
+            }
+        }
+        // --- END OF CORRECTED LOGIC ---
 
         List<OrderItem> items = request.getCartItems().stream().map(item -> {
             OrderItem i = new OrderItem();
             i.setProductName(item.getProductName());
             i.setQuantity(item.getQuantity());
             i.setPrice(item.getPrice());
-            i.setOrder(order);
+            i.setOrder(order); // Link the OrderItem to its parent Order
             return i;
         }).collect(Collectors.toList());
 
-        order.setItems(items);
+        order.setItems(items); // Set the list of items on the order
 
-        orderRepository.save(order);
+        orderRepository.save(order); // Save the order, which cascades to save order items
     }
 
     public List<Order> getMyOrders(String token) {
         Long userId = JwtUtil.extractUserId(token);
-        // The returned Order objects will now include the 'status' field automatically
         return orderRepository.findByUserId(userId);
     }
 
     public List<Order> getAllOrders() {
-        // The returned Order objects will now include the 'status' field automatically
         return orderRepository.findAll();
     }
 
-    // --- ADD THIS NEW METHOD ---
     public void updateOrderStatus(Long orderId, String newStatus) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("Order not found with ID: " + orderId));
 
         try {
-            // Convert the string newStatus to the OrderStatus enum
             OrderStatus statusEnum = OrderStatus.valueOf(newStatus.toUpperCase());
             order.setStatus(statusEnum);
             orderRepository.save(order);
         } catch (IllegalArgumentException e) {
-            // Handle cases where an invalid status string is provided (e.g., "invalid" instead of "ACCEPTED")
             throw new IllegalArgumentException("Invalid status provided: " + newStatus, e);
         }
     }
@@ -85,5 +88,5 @@ public class OrderService {
         }
         orderRepository.deleteById(orderId);
     }
-  
+
 }
